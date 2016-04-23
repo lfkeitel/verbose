@@ -21,12 +21,15 @@ var colors = map[LogLevel]Color{
 	LogLevelCustom:    ColorWhite,
 }
 
+// StdOutHandler writes log message to standard out
+// It even uses color!
 type StdOutHandler struct {
 	min LogLevel
 	max LogLevel
 	out io.Writer // Usually os.Stdout, mainly used for testing
 }
 
+// NewStdOutHandler creates a new StdOutHandler, surprise!
 func NewStdOutHandler() *StdOutHandler {
 	return &StdOutHandler{
 		min: LogLevelDebug,
@@ -35,11 +38,14 @@ func NewStdOutHandler() *StdOutHandler {
 	}
 }
 
+// SetLevel will set both the minimum and maximum log levels to l. This makes
+// the handler only respond to the single level l.
 func (s *StdOutHandler) SetLevel(l LogLevel) {
 	s.min = l
 	s.max = l
 }
 
+// SetMinLevel will set the minimum log level the handler will handle.
 func (s *StdOutHandler) SetMinLevel(l LogLevel) {
 	if l > s.max {
 		return
@@ -47,6 +53,7 @@ func (s *StdOutHandler) SetMinLevel(l LogLevel) {
 	s.min = l
 }
 
+// SetMaxLevel will set the maximum log level the handler will handle.
 func (s *StdOutHandler) SetMaxLevel(l LogLevel) {
 	if l < s.min {
 		return
@@ -54,10 +61,12 @@ func (s *StdOutHandler) SetMaxLevel(l LogLevel) {
 	s.max = l
 }
 
+// Handles returns whether the handler handles log level l.
 func (s *StdOutHandler) Handles(l LogLevel) bool {
 	return (s.min <= l && l <= s.max)
 }
 
+// WriteLog writes the log message to standard output
 func (s *StdOutHandler) WriteLog(l LogLevel, name, msg string) {
 	now := time.Now().Format("2006-01-02 15:04:05 MST")
 	fmt.Fprintf(
@@ -73,3 +82,6 @@ func (s *StdOutHandler) WriteLog(l LogLevel, name, msg string) {
 		msg,
 	)
 }
+
+// Close satisfies the interface, NOOP
+func (s *StdOutHandler) Close() {}

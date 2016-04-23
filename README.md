@@ -1,15 +1,12 @@
 Verbose - Logging for Go
 =========================
 
+[![GoDoc](https://godoc.org/github.com/dragonrider23/verbose?status.svg)](https://godoc.org/github.com/dragonrider23/verbose)
+
 Verbose allows for organized, simplified, custom
 logging for any application. Verbose makes creating logs easy.
 Create multiple loggers for different purposes each with their
 own handlers.
-
-Documentation
--------------
-
-[View Package Documentation](http://godoc.org/github.com/dragonrider23/verbose)
 
 Usage
 -----

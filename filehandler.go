@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// FileHandler writes log messages to a file to a directory
 type FileHandler struct {
 	min      LogLevel
 	max      LogLevel
@@ -18,6 +19,11 @@ type FileHandler struct {
 	m        sync.Mutex
 }
 
+// NewFileHandler takes the path and returns a FileHandler. If the path exists,
+// file or directory mode will be Determined by what path is. If it doesn't exist,
+// the mode will be file if path has an extension, otherwise it will be directory.
+// In file mode, all log messages are written to a single file.
+// In directory mode, each level is written to it's own file.
 func NewFileHandler(path string) (*FileHandler, error) {
 	f := &FileHandler{
 		min:  LogLevelDebug,
@@ -53,11 +59,14 @@ func NewFileHandler(path string) (*FileHandler, error) {
 	return f, nil
 }
 
+// SetLevel will set both the minimum and maximum log levels to l. This makes
+// the handler only respond to the single level l.
 func (f *FileHandler) SetLevel(l LogLevel) {
 	f.min = l
 	f.max = l
 }
 
+// SetMinLevel will set the minimum log level the handler will handle.
 func (f *FileHandler) SetMinLevel(l LogLevel) {
 	if l > f.max {
 		return
@@ -65,6 +74,7 @@ func (f *FileHandler) SetMinLevel(l LogLevel) {
 	f.min = l
 }
 
+// SetMaxLevel will set the maximum log level the handler will handle.
 func (f *FileHandler) SetMaxLevel(l LogLevel) {
 	if l < f.min {
 		return
@@ -72,10 +82,12 @@ func (f *FileHandler) SetMaxLevel(l LogLevel) {
 	f.max = l
 }
 
+// Handles returns whether the handler handles log level l.
 func (f *FileHandler) Handles(l LogLevel) bool {
 	return (f.min <= l && l <= f.max)
 }
 
+// WriteLog will write the log message to a file.
 func (f *FileHandler) WriteLog(l LogLevel, name, msg string) {
 	now := time.Now().Format("2006-01-02 15:04:05 MST")
 	var logfile string
@@ -101,3 +113,6 @@ func (f *FileHandler) WriteLog(l LogLevel, name, msg string) {
 	}
 	return
 }
+
+// Close satisfies the interface, NOOP
+func (f *FileHandler) Close() {}

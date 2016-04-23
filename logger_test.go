@@ -21,6 +21,8 @@ func newTestHandler(t *testing.T, l LogLevel, name, msg string) *testHandler {
 
 func (t *testHandler) Handles(l LogLevel) bool { return (l == t.level) }
 
+func (t *testHandler) Close() {}
+
 func (t *testHandler) WriteLog(l LogLevel, name, msg string) {
 	if l != t.level {
 		t.tester.Errorf("Handled incorrect level. Expected %d, got %d", t.level, l)
