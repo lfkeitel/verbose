@@ -47,10 +47,10 @@ they can handle the log level.
 Included handlers
 -----------------
 
-StdOutHandler
+StdoutHandler
 -------------
 
-The StdOutHandler will print colored log messages to stdout. This handler supports specifying
+The StdoutHandler will print colored log messages to stdout. This handler supports specifying
 a minimum and maximum log level.
 
 FileHandler
@@ -58,7 +58,7 @@ FileHandler
 
 The FileHandler will write log messages to a file or directory. If it's writing to a directory,
 each log level will have its own file. Otherwise all log levels are written to a single file.
-Like the StdOutHandler, FileHandlers support specifying a minimum and maximum log level to handle.
+Like the StdoutHandler, FileHandlers support specifying a minimum and maximum log level to handle.
 
 Release Notes
 -------------

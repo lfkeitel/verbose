@@ -8,8 +8,8 @@ import (
 	"testing"
 )
 
-func TestStdOutDefaults(t *testing.T) {
-	sh := NewStdOutHandler()
+func TestStdoutDefaults(t *testing.T) {
+	sh := NewStdoutHandler()
 	if sh.min != LogLevelDebug {
 		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelCustom, sh.min)
 	}
@@ -21,8 +21,8 @@ func TestStdOutDefaults(t *testing.T) {
 	}
 }
 
-func TestStdOutLevelSetting(t *testing.T) {
-	sh := NewStdOutHandler()
+func TestStdoutLevelSetting(t *testing.T) {
+	sh := NewStdoutHandler()
 	sh.SetLevel(LogLevelWarning)
 	if sh.min != LogLevelWarning {
 		t.Errorf("Min level not set correctly. Expected %d, got %d", LogLevelWarning, sh.min)
@@ -53,7 +53,7 @@ func TestStdOutLevelSetting(t *testing.T) {
 	}
 }
 
-func TestStdOutWriteLog(t *testing.T) {
+func TestStdoutWriteLog(t *testing.T) {
 	buf := &bytes.Buffer{}
 	msg := "My spoon is too big"
 	expected := fmt.Sprintf(
@@ -65,7 +65,7 @@ func TestStdOutWriteLog(t *testing.T) {
 		ColorReset,
 		msg,
 	)
-	sh := NewStdOutHandler()
+	sh := NewStdoutHandler()
 	sh.out = buf
 
 	sh.WriteLog(LogLevelInfo, "logger", msg)
