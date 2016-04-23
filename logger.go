@@ -1,10 +1,8 @@
+//go:generate go run ./tools/level_generator.go -output log_levels.go
+
 package verbose
 
-import (
-	"fmt"
-	"os"
-	"sync"
-)
+import "sync"
 
 // LogLevel is used to compare levels in a consistant manner
 type LogLevel int
@@ -214,114 +212,4 @@ func (l *Logger) Log(level LogLevel, msg string) {
 			h.WriteLog(level, l.name, msg)
 		}
 	}
-}
-
-// Debug - Log debug message
-func (l *Logger) Debug(m string) {
-	l.Log(LogLevelDebug, m)
-	return
-}
-
-// Debugf - Log formatted debug message
-func (l *Logger) Debugf(m string, v ...interface{}) {
-	l.Log(LogLevelDebug, fmt.Sprintf(m, v...))
-	return
-}
-
-// Info - Log informational message
-func (l *Logger) Info(m string) {
-	l.Log(LogLevelInfo, m)
-	return
-}
-
-// Infof - Log formatted informational message
-func (l *Logger) Infof(m string, v ...interface{}) {
-	l.Log(LogLevelInfo, fmt.Sprintf(m, v...))
-	return
-}
-
-// Notice - Log notice message
-func (l *Logger) Notice(m string) {
-	l.Log(LogLevelNotice, m)
-	return
-}
-
-// Noticef - Log formatted notice message
-func (l *Logger) Noticef(m string, v ...interface{}) {
-	l.Log(LogLevelNotice, fmt.Sprintf(m, v...))
-	return
-}
-
-// Warning - Log warning message
-func (l *Logger) Warning(m string) {
-	l.Log(LogLevelWarning, m)
-	return
-}
-
-// Warningf - Log formatted warning message
-func (l *Logger) Warningf(m string, v ...interface{}) {
-	l.Log(LogLevelWarning, fmt.Sprintf(m, v...))
-	return
-}
-
-// Error - Log error message
-func (l *Logger) Error(m string) {
-	l.Log(LogLevelError, m)
-	return
-}
-
-// Errorf - Log formatted error message
-func (l *Logger) Errorf(m string, v ...interface{}) {
-	l.Log(LogLevelError, fmt.Sprintf(m, v...))
-	return
-}
-
-// Critical - Log critical message
-func (l *Logger) Critical(m string) {
-	l.Log(LogLevelCritical, m)
-	return
-}
-
-// Criticalf - Log formatted critical message
-func (l *Logger) Criticalf(m string, v ...interface{}) {
-	l.Log(LogLevelCritical, fmt.Sprintf(m, v...))
-	return
-}
-
-// Alert - Log alert message
-func (l *Logger) Alert(m string) {
-	l.Log(LogLevelAlert, m)
-	return
-}
-
-// Alertf - Log formatted alert message
-func (l *Logger) Alertf(m string, v ...interface{}) {
-	l.Log(LogLevelAlert, fmt.Sprintf(m, v...))
-	return
-}
-
-// Emergency - Log emergency message
-func (l *Logger) Emergency(m string) {
-	l.Log(LogLevelEmergency, m)
-	return
-}
-
-// Emergencyf - Log formatted emergency message
-func (l *Logger) Emergencyf(m string, v ...interface{}) {
-	l.Log(LogLevelEmergency, fmt.Sprintf(m, v...))
-	return
-}
-
-// Fatal - Log fatal message, calls os.Exit(1)
-func (l *Logger) Fatal(m string) {
-	l.Log(LogLevelFatal, m)
-	os.Exit(1)
-	return
-}
-
-// Fatalf - Log formatted fatal message, calls os.Exit(1)
-func (l *Logger) Fatalf(m string, v ...interface{}) {
-	l.Log(LogLevelFatal, fmt.Sprintf(m, v...))
-	os.Exit(1)
-	return
 }
