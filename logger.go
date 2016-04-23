@@ -52,7 +52,7 @@ const (
 	ColorMagenta Color = "\033[35m"
 	ColorCyan    Color = "\033[36m"
 	ColorWhite   Color = "\033[37m"
-	ColorGrey    Color = "\x1B[90m"
+	ColorGrey    Color = "\033[90m"
 )
 
 var (
