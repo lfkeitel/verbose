@@ -55,15 +55,25 @@ func TestLoggerNewGet(t *testing.T) {
 	}
 }
 
-// TestAddHandler ensure handlers are added correctly
-func TestAddHandler(t *testing.T) {
+// TestLoggerHandlers ensure handlers are manipulated correctly
+func TestLoggerHandlers(t *testing.T) {
 	clearLoggers()
 	l1 := Get("logger 1")
-	l1.AddHandler(&testHandler{})
-	l1.AddHandler(&testHandler{})
+	l1.AddHandler("h", &testHandler{})
+	l1.AddHandler("h1", &testHandler{})
 
 	if len(l1.handlers) != 2 {
 		t.Errorf("Not enough handlers. Expected 2, got %d", len(l1.handlers))
+	}
+
+	h := l1.GetHandler("h")
+	if h == nil {
+		t.Error("No handler returned")
+	}
+
+	l1.RemoveHandler("h")
+	if len(l1.handlers) != 1 {
+		t.Errorf("Incorrect number of handlers. Expected 1, got %d", len(l1.handlers))
 	}
 }
 
@@ -72,8 +82,8 @@ func TestAddHandler(t *testing.T) {
 func TestNewOverwrites(t *testing.T) {
 	clearLoggers()
 	logger := Get("logger 1")
-	logger.AddHandler(&testHandler{})
-	logger.AddHandler(&testHandler{})
+	logger.AddHandler("h", &testHandler{})
+	logger.AddHandler("h1", &testHandler{})
 	handlers := len(logger.handlers)
 
 	newLogger := New("logger 1")
@@ -89,15 +99,15 @@ func TestLoggingLevels(t *testing.T) {
 	clearLoggers()
 	testMsg := "The space ship is coming "
 	logger := New("logger1")
-	logger.AddHandler(newTestHandler(t, LogLevelCustom, "logger1", testMsg+LogLevelCustom.String()))
-	logger.AddHandler(newTestHandler(t, LogLevelEmergency, "logger1", testMsg+LogLevelEmergency.String()))
-	logger.AddHandler(newTestHandler(t, LogLevelAlert, "logger1", testMsg+LogLevelAlert.String()))
-	logger.AddHandler(newTestHandler(t, LogLevelCritical, "logger1", testMsg+LogLevelCritical.String()))
-	logger.AddHandler(newTestHandler(t, LogLevelError, "logger1", testMsg+LogLevelError.String()))
-	logger.AddHandler(newTestHandler(t, LogLevelWarning, "logger1", testMsg+LogLevelWarning.String()))
-	logger.AddHandler(newTestHandler(t, LogLevelNotice, "logger1", testMsg+LogLevelNotice.String()))
-	logger.AddHandler(newTestHandler(t, LogLevelInfo, "logger1", testMsg+LogLevelInfo.String()))
-	logger.AddHandler(newTestHandler(t, LogLevelDebug, "logger1", testMsg+LogLevelDebug.String()))
+	logger.AddHandler("h1", newTestHandler(t, LogLevelCustom, "logger1", testMsg+LogLevelCustom.String()))
+	logger.AddHandler("h2", newTestHandler(t, LogLevelEmergency, "logger1", testMsg+LogLevelEmergency.String()))
+	logger.AddHandler("h3", newTestHandler(t, LogLevelAlert, "logger1", testMsg+LogLevelAlert.String()))
+	logger.AddHandler("h4", newTestHandler(t, LogLevelCritical, "logger1", testMsg+LogLevelCritical.String()))
+	logger.AddHandler("h5", newTestHandler(t, LogLevelError, "logger1", testMsg+LogLevelError.String()))
+	logger.AddHandler("h6", newTestHandler(t, LogLevelWarning, "logger1", testMsg+LogLevelWarning.String()))
+	logger.AddHandler("h7", newTestHandler(t, LogLevelNotice, "logger1", testMsg+LogLevelNotice.String()))
+	logger.AddHandler("h8", newTestHandler(t, LogLevelInfo, "logger1", testMsg+LogLevelInfo.String()))
+	logger.AddHandler("h9", newTestHandler(t, LogLevelDebug, "logger1", testMsg+LogLevelDebug.String()))
 
 	logger.Log(LogLevelCustom, testMsg+LogLevelCustom.String())
 	logger.Emergency(testMsg + LogLevelEmergency.String())

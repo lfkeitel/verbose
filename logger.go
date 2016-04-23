@@ -106,10 +106,28 @@ type Handler interface {
 	Close()
 }
 
+// Classic creates a logger with both the StdoutHandler and FileHandlers
+// already added. If path is "", the FileHandler is not added.
+// This is meant for convenience. The handlers use their default
+// min and max levels. The StdoutHandler is named "stdout" and the
+// FileHandler is named "file"
+func Classic(n, path string) (*Logger, error) {
+	l := New(n)
+	l.AddHandler("stdout", NewStdoutHandler())
+	if path != "" {
+		f, err := NewFileHandler(path)
+		if err != nil {
+			return l, err
+		}
+		l.AddHandler("file", f)
+	}
+	return l, nil
+}
+
 // A Logger takes a message and writes it to as many handlers as possible
 type Logger struct {
 	name     string
-	handlers []Handler
+	handlers map[string]Handler
 	m        sync.RWMutex
 }
 
@@ -117,14 +135,15 @@ type Logger struct {
 // already exists, it will be replaced with the new logger.
 func New(n string) *Logger {
 	l := &Logger{
-		name: n,
-		m:    sync.RWMutex{},
+		name:     n,
+		handlers: make(map[string]Handler),
+		m:        sync.RWMutex{},
 	}
 	addLogger(l)
 	return l
 }
 
-// Get returns and existing logger with name n or a new Logger if one
+// Get returns an existing logger with name n or a new Logger if one
 // doesn't exist. To ensure Loggers are never overwritten, it may be safer to
 // always use this method.
 func Get(n string) *Logger {
@@ -135,14 +154,43 @@ func Get(n string) *Logger {
 	return New(n)
 }
 
-// AddHandler will add Handler h to the logger. Handlers cannot be removed.
-func (l *Logger) AddHandler(h Handler) {
-	if h == nil {
+// AddHandler will add Handler h to the logger named n. If a handler with
+// the same name already exists, it will be overwritten.
+func (l *Logger) AddHandler(n string, h Handler) {
+	if n == "" || h == nil {
 		return
 	}
 	l.m.Lock()
-	l.handlers = append(l.handlers, h)
+	l.handlers[n] = h
 	l.m.Unlock()
+}
+
+// GetHandler will return handler with name n or nil if it doesn't exist.
+func (l *Logger) GetHandler(n string) Handler {
+	if n == "" {
+		return nil
+	}
+	l.m.RLock()
+	h, ok := l.handlers[n]
+	l.m.RUnlock()
+	if ok {
+		return h
+	}
+	return nil
+}
+
+// RemoveHandler will remove the handler named n.
+func (l *Logger) RemoveHandler(n string) {
+	if n == "" {
+		return
+	}
+
+	l.m.Lock()
+	defer l.m.Unlock()
+	_, ok := l.handlers[n]
+	if ok {
+		delete(l.handlers, n)
+	}
 }
 
 // Close calls Close() on all the handlers then removes itself from the logger registry
