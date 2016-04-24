@@ -1,6 +1,9 @@
-.PHONE: lint test vet full generate
+.PHONE: doc lint test vet full generate
 
 default: lint vet test
+
+doc:
+	godoc -http=:6060 -index
 
 lint:
 	golint ./...

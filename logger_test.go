@@ -23,15 +23,15 @@ func (t *testHandler) Handles(l LogLevel) bool { return (l == t.level) }
 
 func (t *testHandler) Close() {}
 
-func (t *testHandler) WriteLog(l LogLevel, name, msg string) {
-	if l != t.level {
-		t.tester.Errorf("Handled incorrect level. Expected %d, got %d", t.level, l)
+func (t *testHandler) WriteLog(e *Entry) {
+	if e.Level != t.level {
+		t.tester.Errorf("Handled incorrect level. Expected %d, got %d", t.level, e.Level)
 	}
-	if name != t.loggerName {
-		t.tester.Errorf("Incorrect logger name. Expected %s, got %s", t.loggerName, name)
+	if e.Logger.Name() != t.loggerName {
+		t.tester.Errorf("Incorrect logger name. Expected %s, got %s", t.loggerName, e.Logger.Name())
 	}
-	if msg != t.msg {
-		t.tester.Errorf("Incorrect message. Expected %s, got %s", t.msg, msg)
+	if e.Message != t.msg {
+		t.tester.Errorf("Incorrect message. Expected %s, got %s", t.msg, e.Message)
 	}
 }
 
@@ -99,7 +99,6 @@ func TestLoggingLevels(t *testing.T) {
 	clearLoggers()
 	testMsg := "The space ship is coming "
 	logger := New("logger1")
-	logger.AddHandler("h1", newTestHandler(t, LogLevelCustom, "logger1", testMsg+LogLevelCustom.String()))
 	logger.AddHandler("h2", newTestHandler(t, LogLevelEmergency, "logger1", testMsg+LogLevelEmergency.String()))
 	logger.AddHandler("h3", newTestHandler(t, LogLevelAlert, "logger1", testMsg+LogLevelAlert.String()))
 	logger.AddHandler("h4", newTestHandler(t, LogLevelCritical, "logger1", testMsg+LogLevelCritical.String()))
@@ -109,7 +108,6 @@ func TestLoggingLevels(t *testing.T) {
 	logger.AddHandler("h8", newTestHandler(t, LogLevelInfo, "logger1", testMsg+LogLevelInfo.String()))
 	logger.AddHandler("h9", newTestHandler(t, LogLevelDebug, "logger1", testMsg+LogLevelDebug.String()))
 
-	logger.Log(LogLevelCustom, testMsg+LogLevelCustom.String())
 	logger.Emergency(testMsg + LogLevelEmergency.String())
 	logger.Emergencyf("%s%s", testMsg, LogLevelEmergency.String())
 	logger.Alert(testMsg + LogLevelAlert.String())

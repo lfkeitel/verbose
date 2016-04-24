@@ -11,10 +11,10 @@ import (
 func TestStdoutDefaults(t *testing.T) {
 	sh := NewStdoutHandler()
 	if sh.min != LogLevelDebug {
-		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelCustom, sh.min)
+		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelDebug, sh.min)
 	}
-	if sh.max != LogLevelCustom {
-		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelCustom, sh.max)
+	if sh.max != LogLevelEmergency {
+		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelEmergency, sh.max)
 	}
 	if sh.out != os.Stdout {
 		t.Error("Incorrect default writer, not Stdout")
@@ -68,7 +68,10 @@ func TestStdoutWriteLog(t *testing.T) {
 	sh := NewStdoutHandler()
 	sh.out = buf
 
-	sh.WriteLog(LogLevelInfo, "logger", msg)
+	e := NewEntry(&Logger{name: "logger"})
+	e.Level = LogLevelInfo
+	e.Message = msg
+	sh.WriteLog(e)
 
 	result := buf.String()[30:]
 	if result != expected {
