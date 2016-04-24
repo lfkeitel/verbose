@@ -1,6 +1,9 @@
 package verbose
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 // testHandler is a special handler that will check for a correct LogLevel and message
 type testHandler struct {
@@ -10,10 +13,11 @@ type testHandler struct {
 	level      LogLevel
 }
 
-func newTestHandler(t *testing.T, l LogLevel, name, msg string) *testHandler {
+func newTestHandler(t *testing.T, l LogLevel, name string, msg ...interface{}) *testHandler {
+	message := fmt.Sprintln(msg...)
 	return &testHandler{
 		tester:     t,
-		msg:        msg,
+		msg:        message[:len(message)-1],
 		loggerName: name,
 		level:      l,
 	}
@@ -97,31 +101,39 @@ func TestNewOverwrites(t *testing.T) {
 // common message and the LogLevel.String().
 func TestLoggingLevels(t *testing.T) {
 	clearLoggers()
-	testMsg := "The space ship is coming "
+	testMsg := "The space ship is coming"
 	logger := New("logger1")
-	logger.AddHandler("h2", newTestHandler(t, LogLevelEmergency, "logger1", testMsg+LogLevelEmergency.String()))
-	logger.AddHandler("h3", newTestHandler(t, LogLevelAlert, "logger1", testMsg+LogLevelAlert.String()))
-	logger.AddHandler("h4", newTestHandler(t, LogLevelCritical, "logger1", testMsg+LogLevelCritical.String()))
-	logger.AddHandler("h5", newTestHandler(t, LogLevelError, "logger1", testMsg+LogLevelError.String()))
-	logger.AddHandler("h6", newTestHandler(t, LogLevelWarning, "logger1", testMsg+LogLevelWarning.String()))
-	logger.AddHandler("h7", newTestHandler(t, LogLevelNotice, "logger1", testMsg+LogLevelNotice.String()))
-	logger.AddHandler("h8", newTestHandler(t, LogLevelInfo, "logger1", testMsg+LogLevelInfo.String()))
-	logger.AddHandler("h9", newTestHandler(t, LogLevelDebug, "logger1", testMsg+LogLevelDebug.String()))
+	logger.AddHandler("h0", newTestHandler(t, LogLevelEmergency, "logger1", testMsg, LogLevelEmergency.String()))
+	logger.AddHandler("h1", newTestHandler(t, LogLevelAlert, "logger1", testMsg, LogLevelAlert.String()))
+	logger.AddHandler("h2", newTestHandler(t, LogLevelCritical, "logger1", testMsg, LogLevelCritical.String()))
+	logger.AddHandler("h3", newTestHandler(t, LogLevelError, "logger1", testMsg, LogLevelError.String()))
+	logger.AddHandler("h4", newTestHandler(t, LogLevelWarning, "logger1", testMsg, LogLevelWarning.String()))
+	logger.AddHandler("h5", newTestHandler(t, LogLevelNotice, "logger1", testMsg, LogLevelNotice.String()))
+	logger.AddHandler("h6", newTestHandler(t, LogLevelInfo, "logger1", testMsg, LogLevelInfo.String()))
+	logger.AddHandler("h7", newTestHandler(t, LogLevelDebug, "logger1", testMsg, LogLevelDebug.String()))
 
-	logger.Emergency(testMsg + LogLevelEmergency.String())
-	logger.Emergencyf("%s%s", testMsg, LogLevelEmergency.String())
-	logger.Alert(testMsg + LogLevelAlert.String())
-	logger.Alertf("%s%s", testMsg, LogLevelAlert.String())
-	logger.Critical(testMsg + LogLevelCritical.String())
-	logger.Criticalf("%s%s", testMsg, LogLevelCritical.String())
-	logger.Error(testMsg + LogLevelError.String())
-	logger.Errorf("%s%s", testMsg, LogLevelError.String())
-	logger.Warning(testMsg + LogLevelWarning.String())
-	logger.Warningf("%s%s", testMsg, LogLevelWarning.String())
-	logger.Notice(testMsg + LogLevelNotice.String())
-	logger.Noticef("%s%s", testMsg, LogLevelNotice.String())
-	logger.Info(testMsg + LogLevelInfo.String())
-	logger.Infof("%s%s", testMsg, LogLevelInfo.String())
-	logger.Debug(testMsg + LogLevelDebug.String())
-	logger.Debugf("%s%s", testMsg, LogLevelDebug.String())
+	logger.Emergency(testMsg, " ", LogLevelEmergency.String())
+	logger.Emergencyf("%s %s", testMsg, LogLevelEmergency.String())
+	logger.Emergencyln(testMsg, LogLevelEmergency.String())
+	logger.Alert(testMsg, " ", LogLevelAlert.String())
+	logger.Alertf("%s %s", testMsg, LogLevelAlert.String())
+	logger.Alertln(testMsg, LogLevelAlert.String())
+	logger.Critical(testMsg, " ", LogLevelCritical.String())
+	logger.Criticalf("%s %s", testMsg, LogLevelCritical.String())
+	logger.Criticalln(testMsg, LogLevelCritical.String())
+	logger.Error(testMsg, " ", LogLevelError.String())
+	logger.Errorf("%s %s", testMsg, LogLevelError.String())
+	logger.Errorln(testMsg, LogLevelError.String())
+	logger.Warning(testMsg, " ", LogLevelWarning.String())
+	logger.Warningf("%s %s", testMsg, LogLevelWarning.String())
+	logger.Warningln(testMsg, LogLevelWarning.String())
+	logger.Notice(testMsg, " ", LogLevelNotice.String())
+	logger.Noticef("%s %s", testMsg, LogLevelNotice.String())
+	logger.Noticeln(testMsg, LogLevelNotice.String())
+	logger.Info(testMsg, " ", LogLevelInfo.String())
+	logger.Infof("%s %s", testMsg, LogLevelInfo.String())
+	logger.Infoln(testMsg, LogLevelInfo.String())
+	logger.Debug(testMsg, " ", LogLevelDebug.String())
+	logger.Debugf("%s %s", testMsg, LogLevelDebug.String())
+	logger.Debugln(testMsg, LogLevelDebug.String())
 }
