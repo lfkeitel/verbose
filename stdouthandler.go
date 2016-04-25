@@ -1,6 +1,7 @@
 package verbose
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -82,10 +83,11 @@ func (s *StdoutHandler) Handles(l LogLevel) bool {
 
 // WriteLog writes the log message to standard output
 func (s *StdoutHandler) WriteLog(e *Entry) {
+	buf := &bytes.Buffer{}
 	now := e.Timestamp.Format("2006-01-02 15:04:05 MST")
 	fmt.Fprintf(
-		s.out,
-		"%s%s: %s%s: %s%s: %s%s\n",
+		buf,
+		"%s%s: %s%s: %s%s: %s%s",
 		ColorGrey,
 		now,
 		colors[e.Level],
@@ -95,6 +97,11 @@ func (s *StdoutHandler) WriteLog(e *Entry) {
 		ColorReset,
 		e.Message,
 	)
+	for k, v := range e.Data {
+		fmt.Fprintf(buf, " %s=%v", k, v)
+	}
+	buf.WriteByte('\n')
+	fmt.Fprint(s.out, buf.String())
 }
 
 // Close satisfies the interface, NOOP

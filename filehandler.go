@@ -1,6 +1,7 @@
 package verbose
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path"
@@ -88,7 +89,6 @@ func (f *FileHandler) Handles(l LogLevel) bool {
 
 // WriteLog will write the log message to a file.
 func (f *FileHandler) WriteLog(e *Entry) {
-	now := e.Timestamp.Format("2006-01-02 15:04:05 MST")
 	var logfile string
 	if !f.separate {
 		logfile = f.path
@@ -96,6 +96,20 @@ func (f *FileHandler) WriteLog(e *Entry) {
 		logfile = fmt.Sprintf("%s-%s.log", strings.ToLower(e.Level.String()), e.Logger.Name())
 		logfile = path.Join(f.path, logfile)
 	}
+
+	buf := &bytes.Buffer{}
+	fmt.Fprintf(
+		buf,
+		"%s: %s: %s: %s",
+		e.Timestamp.Format("2006-01-02 15:04:05 MST"),
+		strings.ToUpper(e.Level.String()),
+		e.Logger.Name(),
+		e.Message,
+	)
+	for k, v := range e.Data {
+		fmt.Fprintf(buf, " %s=%v", k, v)
+	}
+	buf.WriteByte('\n')
 
 	f.m.Lock()
 	defer f.m.Unlock()
@@ -106,7 +120,7 @@ func (f *FileHandler) WriteLog(e *Entry) {
 	}
 	defer file.Close()
 
-	_, err = file.WriteString(now + ": " + e.Message + "\n")
+	_, err = file.Write(buf.Bytes())
 	if err != nil {
 		fmt.Printf("Error writing to log file: %v\n", err)
 	}
