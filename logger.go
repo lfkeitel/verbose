@@ -1,65 +1,12 @@
-//go:generate go run ./tools/level_generator.go -output log_levels.go
+//go:generate go run ./tools/level_generator.go -output logger_levels.go
+//go:generate go run ./tools/entry_generator.go -output entry_levels.go
 
 package verbose
 
 import "sync"
 
-// LogLevel is used to compare levels in a consistant manner
-type LogLevel int
-
-// String returns the stringified version of LogLevel.
-// I.e., "Error" for LogLevelError, and "Debug" for LogLevelDebug
-// It will return an empty string for any undefined level.
-func (l LogLevel) String() string {
-	if s, ok := levelString[l]; ok {
-		return s
-	}
-	return ""
-}
-
-// These are the defined log levels
-const (
-	LogLevelDebug LogLevel = iota
-	LogLevelInfo
-	LogLevelNotice
-	LogLevelWarning
-	LogLevelError
-	LogLevelCritical
-	LogLevelAlert
-	LogLevelEmergency
-	LogLevelFatal
-	LogLevelCustom
-)
-
-// LogLevel to stringified versions
-var levelString = map[LogLevel]string{
-	LogLevelDebug:     "Debug",
-	LogLevelInfo:      "Info",
-	LogLevelNotice:    "Notice",
-	LogLevelWarning:   "Warning",
-	LogLevelError:     "Error",
-	LogLevelCritical:  "Critical",
-	LogLevelAlert:     "Alert",
-	LogLevelEmergency: "Emergency",
-	LogLevelFatal:     "Fatal",
-	LogLevelCustom:    "Custom",
-}
-
-// Color is an escaped color code for the terminal
-type Color string
-
-// Pre-defined colors
-const (
-	ColorReset   Color = "\033[0m"
-	ColorRed     Color = "\033[31m"
-	ColorGreen   Color = "\033[32m"
-	ColorYellow  Color = "\033[33m"
-	ColorBlue    Color = "\033[34m"
-	ColorMagenta Color = "\033[35m"
-	ColorCyan    Color = "\033[36m"
-	ColorWhite   Color = "\033[37m"
-	ColorGrey    Color = "\033[90m"
-)
+// Fields type, used to pass to `WithFields`.
+type Fields map[string]interface{}
 
 var (
 	loggers      map[string]*Logger
@@ -87,21 +34,6 @@ func removeLogger(l *Logger) {
 	loggersMutex.Lock()
 	delete(loggers, l.name)
 	loggersMutex.Unlock()
-}
-
-// A Handler is an object that can be used by the Logger to log a message
-type Handler interface {
-	// Handles returns if it wants to handle a particular log level
-	// This can be used to suppress the higher log levels in production
-	Handles(level LogLevel) bool
-
-	// WriteLog actually logs the message using any system the Handler wishes.
-	// The Handler must accept a LogLevel l which can be used for furthur processing
-	// of specific levels, the name of the logger, and the log message.
-	WriteLog(l LogLevel, name, message string)
-
-	// Close is used to give a handler a chance to close any open resources
-	Close()
 }
 
 // Classic creates a logger with both the StdoutHandler and FileHandlers
@@ -206,10 +138,17 @@ func (l *Logger) Name() string {
 
 // Log is the generic function to log a message with the handlers.
 // All other logging functions are simply wrappers around this.
-func (l *Logger) Log(level LogLevel, msg string) {
-	for _, h := range l.handlers {
-		if h.Handles(level) {
-			h.WriteLog(level, l.name, msg)
-		}
-	}
+func (l *Logger) log(level LogLevel, msg string) {
+	e := NewEntry(l)
+	e.log(level, msg)
+}
+
+// WithField creates an Entry with a single field
+func (l *Logger) WithField(key string, value interface{}) *Entry {
+	return NewEntry(l).WithFields(Fields{key: value})
+}
+
+// WithFields creates an Entry with multiple fields
+func (l *Logger) WithFields(fields Fields) *Entry {
+	return NewEntry(l).WithFields(fields)
 }

@@ -23,10 +23,10 @@ func TestDefaults(t *testing.T) {
 		t.Fatalf("Error making file handler: %s", err.Error())
 	}
 	if fh.min != LogLevelDebug {
-		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelCustom, fh.min)
+		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelDebug, fh.min)
 	}
-	if fh.max != LogLevelCustom {
-		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelCustom, fh.max)
+	if fh.max != LogLevelEmergency {
+		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelEmergency, fh.max)
 	}
 	if fh.separate {
 		t.Error("Incorrect separate field. Expected false, got true")
@@ -80,10 +80,13 @@ func TestFileHandlerWriteLog(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error making file handler: %s", err.Error())
 	}
-	fh.WriteLog(LogLevelAlert, "logger", "What? No coffee!?")
+	e := NewEntry(&Logger{name: "logger"})
+	e.Level = LogLevelAlert
+	e.Message = "What? No coffee!?"
+	fh.WriteLog(e)
 
 	stat, _ := os.Stat(testLogFile)
-	if stat.Size() != 43 {
+	if stat.Size() != 58 {
 		t.Errorf("Incorrect log file size. Expected 43, got %d", stat.Size())
 	}
 
@@ -92,13 +95,16 @@ func TestFileHandlerWriteLog(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error making file handler: %s", err.Error())
 	}
-	fh.WriteLog(LogLevelAlert, "logger", "What? No coffee!?")
+	e = NewEntry(&Logger{name: "logger"})
+	e.Level = LogLevelAlert
+	e.Message = "What? No coffee!?"
+	fh.WriteLog(e)
 
 	stat, err = os.Stat(filepath.Join(testLogDir, "alert-logger.log"))
 	if err != nil {
 		t.Fatalf("Error stating log file: %s", err.Error())
 	}
-	if stat.Size() != 43 {
+	if stat.Size() != 58 {
 		t.Errorf("Incorrect log file size. Expected 43, got %d", stat.Size())
 	}
 }

@@ -27,89 +27,69 @@ var fileTmpl = `// This file was generated with level_generator. DO NOT EDIT
 
 package verbose
 
-import "os"
-
-// LogLevel is used to compare levels in a consistant manner
-type LogLevel int
-
-// String returns the stringified version of LogLevel.
-// I.e., "Error" for LogLevelError, and "Debug" for LogLevelDebug
-// It will return an empty string for any undefined level.
-func (l LogLevel) String() string {
-	if s, ok := levelString[l]; ok {
-		return s
-	}
-	return ""
-}
-
-// These are the defined log levels
-const ({{range $i, $l := .}}
-	LogLevel{{$l}}{{if eq $i 0}} LogLevel = iota{{end}}{{end}}
+import (
+	"os"
+	"fmt"
 )
-
-// LogLevel to stringified versions
-var levelString = map[LogLevel]string{ {{range .}}
-	LogLevel{{.}}:     "{{.}}",{{end}}
-}
 {{range .}}
 // {{.}} - Log {{.}} message
-func (l *Logger) {{.}}(v ...interface{}) {
-    NewEntry(l).{{.}}(v...){{if eq . "Fatal"}}
+func (e *Entry) {{.}}(v ...interface{}) {
+    e.log(LogLevel{{.}}, fmt.Sprint(v...)){{if eq . "Fatal"}}
 	os.Exit(1){{end}}
     return
 }
 {{end}}
 // Panic - Log Panic message
-func (l *Logger) Panic(v ...interface{}) {
-    NewEntry(l).Panic(v...)
+func (e *Entry) Panic(v ...interface{}) {
+    e.log(LogLevelEmergency, fmt.Sprint(v...))
     return
 }
 
 // Print - Log Print message
-func (l *Logger) Print(v ...interface{}) {
-    NewEntry(l).Print(v...)
+func (e *Entry) Print(v ...interface{}) {
+    e.log(LogLevelInfo, fmt.Sprint(v...))
     return
 }
 
 // Printf friendly functions
 {{range .}}
 // {{.}}f - Log formatted {{.}} message
-func (l *Logger) {{.}}f(m string, v ...interface{}) {
-	NewEntry(l).{{.}}f(m, v...){{if eq . "Fatal"}}
+func (e *Entry) {{.}}f(m string, v ...interface{}) {
+    e.log(LogLevel{{.}}, fmt.Sprintf(m, v...)){{if eq . "Fatal"}}
 	os.Exit(1){{end}}
     return
 }
 {{end}}
 // Panicf - Log formatted Panic message
-func (l *Logger) Panicf(m string, v ...interface{}) {
-	NewEntry(l).Panicf(m, v...)
+func (e *Entry) Panicf(m string, v ...interface{}) {
+    e.log(LogLevelEmergency, fmt.Sprintf(m, v...))
     return
 }
 
 // Printf - Log formatted Print message
-func (l *Logger) Printf(m string, v ...interface{}) {
-	NewEntry(l).Printf(m, v...)
+func (e *Entry) Printf(m string, v ...interface{}) {
+    e.log(LogLevelInfo, fmt.Sprintf(m, v...))
     return
 }
 
 // Println friendly functions
 {{range .}}
 // {{.}}ln - Log {{.}} message with newline
-func (l *Logger) {{.}}ln(v ...interface{}) {
-    NewEntry(l).{{.}}ln(v...){{if eq . "Fatal"}}
+func (e *Entry) {{.}}ln(v ...interface{}) {
+    e.log(LogLevel{{.}}, e.sprintlnn(v...)){{if eq . "Fatal"}}
 	os.Exit(1){{end}}
     return
 }
 {{end}}
 // Panicln - Log Panic message with newline
-func (l *Logger) Panicln(v ...interface{}) {
-    NewEntry(l).Panicln(v...)
+func (e *Entry) Panicln(v ...interface{}) {
+    e.log(LogLevelEmergency, e.sprintlnn(v...))
     return
 }
 
 // Println - Log Print message with newline
-func (l *Logger) Println(v ...interface{}) {
-    NewEntry(l).Println(v...)
+func (e *Entry) Println(v ...interface{}) {
+    e.log(LogLevelInfo, e.sprintlnn(v...))
     return
 }
 `
