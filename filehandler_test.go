@@ -25,8 +25,8 @@ func TestDefaults(t *testing.T) {
 	if fh.min != LogLevelDebug {
 		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelDebug, fh.min)
 	}
-	if fh.max != LogLevelEmergency {
-		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelEmergency, fh.max)
+	if fh.max != LogLevelFatal {
+		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelFatal, fh.max)
 	}
 	if fh.separate {
 		t.Error("Incorrect separate field. Expected false, got true")
