@@ -27,7 +27,7 @@ type FileHandler struct {
 func NewFileHandler(path string) (*FileHandler, error) {
 	f := &FileHandler{
 		min:  LogLevelDebug,
-		max:  LogLevelEmergency,
+		max:  LogLevelFatal,
 		path: path,
 		m:    sync.Mutex{},
 	}

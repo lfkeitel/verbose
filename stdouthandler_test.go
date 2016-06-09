@@ -13,8 +13,8 @@ func TestStdoutDefaults(t *testing.T) {
 	if sh.min != LogLevelDebug {
 		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelDebug, sh.min)
 	}
-	if sh.max != LogLevelEmergency {
-		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelEmergency, sh.max)
+	if sh.max != LogLevelFatal {
+		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelFatal, sh.max)
 	}
 	if sh.out != os.Stdout {
 		t.Error("Incorrect default writer, not Stdout")
