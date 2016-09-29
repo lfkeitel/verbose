@@ -58,10 +58,11 @@ func (l *LineFormatter) FormatByte(e *Entry) []byte {
 		e.Logger.Name(),
 		e.Message,
 	)
+	buf.WriteString(" |")
 	dataLen := len(e.Data)
 	i := 1
 	for k, v := range e.Data {
-		fmt.Fprintf(buf, ` | "%s": "%v"`, k, v)
+		fmt.Fprintf(buf, ` "%s": "%v"`, k, v)
 		if i < dataLen {
 			buf.WriteByte(',')
 		}
@@ -91,10 +92,11 @@ func (l *ColoredLineFormatter) FormatByte(e *Entry) []byte {
 		ColorReset,
 		e.Message,
 	)
+	buf.WriteString(" |")
 	dataLen := len(e.Data)
 	i := 1
 	for k, v := range e.Data {
-		fmt.Fprintf(buf, ` | "%s": "%v"`, k, v)
+		fmt.Fprintf(buf, ` "%s": "%v"`, k, v)
 		if i < dataLen {
 			buf.WriteByte(',')
 		}
