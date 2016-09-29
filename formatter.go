@@ -38,6 +38,7 @@ func (j *JSONFormatter) FormatByte(e *Entry) []byte {
 	}
 	buf.WriteByte(']')
 	buf.WriteByte('}')
+	buf.WriteByte('\n')
 	return buf.Bytes()
 }
 
@@ -57,8 +58,14 @@ func (l *LineFormatter) FormatByte(e *Entry) []byte {
 		e.Logger.Name(),
 		e.Message,
 	)
+	dataLen := len(e.Data)
+	i := 1
 	for k, v := range e.Data {
-		fmt.Fprintf(buf, ` "%s": "%v"`, k, v)
+		fmt.Fprintf(buf, ` | "%s": "%v"`, k, v)
+		if i < dataLen {
+			buf.WriteByte(',')
+		}
+		i++
 	}
 	buf.WriteByte('\n')
 	return buf.Bytes()
@@ -84,8 +91,14 @@ func (l *ColoredLineFormatter) FormatByte(e *Entry) []byte {
 		ColorReset,
 		e.Message,
 	)
+	dataLen := len(e.Data)
+	i := 1
 	for k, v := range e.Data {
-		fmt.Fprintf(buf, ` "%s": "%v"`, k, v)
+		fmt.Fprintf(buf, ` | "%s": "%v"`, k, v)
+		if i < dataLen {
+			buf.WriteByte(',')
+		}
+		i++
 	}
 	buf.WriteByte('\n')
 	return buf.Bytes()
