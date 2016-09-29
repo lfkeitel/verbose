@@ -1,20 +1,17 @@
 package verbose
 
 import (
-	"bytes"
-	"fmt"
 	"os"
-	"strings"
 	"testing"
 )
 
 func TestStdoutDefaults(t *testing.T) {
-	sh := NewStdoutHandler()
+	sh := NewStdoutHandler(true)
 	if sh.min != LogLevelDebug {
 		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelDebug, sh.min)
 	}
-	if sh.max != LogLevelEmergency {
-		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelEmergency, sh.max)
+	if sh.max != LogLevelFatal {
+		t.Errorf("Incorrect default maximum. Expected %d, got %d", LogLevelFatal, sh.max)
 	}
 	if sh.out != os.Stdout {
 		t.Error("Incorrect default writer, not Stdout")
@@ -22,7 +19,7 @@ func TestStdoutDefaults(t *testing.T) {
 }
 
 func TestStdoutLevelSetting(t *testing.T) {
-	sh := NewStdoutHandler()
+	sh := NewStdoutHandler(true)
 	sh.SetLevel(LogLevelWarning)
 	if sh.min != LogLevelWarning {
 		t.Errorf("Min level not set correctly. Expected %d, got %d", LogLevelWarning, sh.min)
@@ -50,31 +47,5 @@ func TestStdoutLevelSetting(t *testing.T) {
 
 	if !sh.Handles(LogLevelCritical) {
 		t.Errorf("Incorrect Handles result. Expected true, got %t", sh.Handles(LogLevelCritical))
-	}
-}
-
-func TestStdoutWriteLog(t *testing.T) {
-	buf := &bytes.Buffer{}
-	msg := "My spoon is too big"
-	expected := fmt.Sprintf(
-		"%s%s: %s%s: %s%s\n",
-		colors[LogLevelInfo],
-		strings.ToUpper(LogLevelInfo.String()),
-		ColorGreen,
-		"logger",
-		ColorReset,
-		msg,
-	)
-	sh := NewStdoutHandler()
-	sh.out = buf
-
-	e := NewEntry(&Logger{name: "logger"})
-	e.Level = LogLevelInfo
-	e.Message = msg
-	sh.WriteLog(e)
-
-	result := buf.String()[30:]
-	if result != expected {
-		t.Errorf("Incorrectly formatted message. Expected %s, got %s", expected, result)
 	}
 }

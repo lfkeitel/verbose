@@ -25,8 +25,8 @@ func TestDefaults(t *testing.T) {
 	if fh.min != LogLevelDebug {
 		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelDebug, fh.min)
 	}
-	if fh.max != LogLevelEmergency {
-		t.Errorf("Incorrect default minimum. Expected %d, got %d", LogLevelEmergency, fh.max)
+	if fh.max != LogLevelFatal {
+		t.Errorf("Incorrect default maximum. Expected %d, got %d", LogLevelFatal, fh.max)
 	}
 	if fh.separate {
 		t.Error("Incorrect separate field. Expected false, got true")
@@ -87,7 +87,7 @@ func TestFileHandlerWriteLog(t *testing.T) {
 
 	stat, _ := os.Stat(testLogFile)
 	if stat.Size() != 58 {
-		t.Errorf("Incorrect log file size. Expected 43, got %d", stat.Size())
+		t.Errorf("Incorrect log file size. Expected 58, got %d", stat.Size())
 	}
 
 	// Test write to directory
@@ -105,6 +105,6 @@ func TestFileHandlerWriteLog(t *testing.T) {
 		t.Fatalf("Error stating log file: %s", err.Error())
 	}
 	if stat.Size() != 58 {
-		t.Errorf("Incorrect log file size. Expected 43, got %d", stat.Size())
+		t.Errorf("Incorrect log file size. Expected 58, got %d", stat.Size())
 	}
 }

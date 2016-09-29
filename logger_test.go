@@ -23,9 +23,12 @@ func newTestHandler(t *testing.T, l LogLevel, name string, msg ...interface{}) *
 	}
 }
 
-func (t *testHandler) Handles(l LogLevel) bool { return (l == t.level) }
-
-func (t *testHandler) Close() {}
+func (t *testHandler) Handles(l LogLevel) bool  { return (l == t.level) }
+func (_ *testHandler) SetFormatter(_ Formatter) {}
+func (_ *testHandler) Close()                   {}
+func (_ *testHandler) SetLevel(_ LogLevel)      {}
+func (_ *testHandler) SetMinLevel(_ LogLevel)   {}
+func (_ *testHandler) SetMaxLevel(_ LogLevel)   {}
 
 func (t *testHandler) WriteLog(e *Entry) {
 	if e.Level != t.level {
