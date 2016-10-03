@@ -13,7 +13,7 @@ func TestJSONFormatter(t *testing.T) {
 		"key1": "value1",
 	}
 	now := time.Now()
-	expected := `{"timestamp":"%s","level":"INFO","logger":"logger","message":"My spoon is too big","data":[{"key1":"value1"}]}` + "\n"
+	expected := `{"timestamp":"%s","level":"INFO","logger":"logger","message":"My spoon is too big","data":{"key1":"value1"}}` + "\n"
 	expected = fmt.Sprintf(expected, now.Format("2006-01-02 15:04:05 MST"))
 
 	formatter := &JSONFormatter{}
