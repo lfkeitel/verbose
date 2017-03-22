@@ -86,8 +86,8 @@ func TestFileHandlerWriteLog(t *testing.T) {
 	fh.WriteLog(e)
 
 	stat, _ := os.Stat(testLogFile)
-	if stat.Size() != 58 {
-		t.Errorf("Incorrect log file size. Expected 58, got %d", stat.Size())
+	if stat.Size() != 55 {
+		t.Errorf("Incorrect log file size. Expected 55, got %d", stat.Size())
 	}
 
 	// Test write to directory
@@ -104,7 +104,7 @@ func TestFileHandlerWriteLog(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error stating log file: %s", err.Error())
 	}
-	if stat.Size() != 58 {
-		t.Errorf("Incorrect log file size. Expected 58, got %d", stat.Size())
+	if stat.Size() != 55 {
+		t.Errorf("Incorrect log file size. Expected 55, got %d", stat.Size())
 	}
 }
