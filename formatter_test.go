@@ -14,9 +14,9 @@ func TestJSONFormatter(t *testing.T) {
 	}
 	now := time.Now()
 	expected := `{"timestamp":"%s","level":"INFO","logger":"logger","message":"My spoon is too big","data":{"key1":"value1"}}` + "\n"
-	expected = fmt.Sprintf(expected, now.Format("2006-01-02 15:04:05 MST"))
+	expected = fmt.Sprintf(expected, now.Format(time.RFC3339))
 
-	formatter := &JSONFormatter{}
+	formatter := NewJSONFormatter()
 
 	e := NewEntry(&Logger{name: "logger"})
 	e.Level = LogLevelInfo
@@ -38,13 +38,13 @@ func TestLineFormatter(t *testing.T) {
 	now := time.Now()
 	expected := fmt.Sprintf(
 		`%s: %s: %s: %s | "key1": "value1"%s`,
-		now.Format("2006-01-02 15:04:05 MST"),
+		now.Format(time.RFC3339),
 		strings.ToUpper(LogLevelInfo.String()),
 		"logger",
 		msg,
 		"\n",
 	)
-	formatter := &LineFormatter{}
+	formatter := NewLineFormatter()
 
 	e := NewEntry(&Logger{name: "logger"})
 	e.Level = LogLevelInfo
@@ -67,7 +67,7 @@ func TestColoredLineFormatter(t *testing.T) {
 	expected := fmt.Sprintf(
 		`%s%s: %s%s: %s%s: %s%s | "key1": "value1"%s`,
 		ColorGrey,
-		now.Format("2006-01-02 15:04:05 MST"),
+		now.Format(time.RFC3339),
 		colors[LogLevelInfo],
 		strings.ToUpper(LogLevelInfo.String()),
 		ColorGreen,
@@ -76,7 +76,7 @@ func TestColoredLineFormatter(t *testing.T) {
 		msg,
 		"\n",
 	)
-	formatter := &ColoredLineFormatter{}
+	formatter := NewColoredLineFormatter()
 
 	e := NewEntry(&Logger{name: "logger"})
 	e.Level = LogLevelInfo

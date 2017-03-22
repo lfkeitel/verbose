@@ -31,7 +31,7 @@ func NewFileHandler(path string) (*FileHandler, error) {
 		min:       LogLevelDebug,
 		max:       LogLevelFatal,
 		path:      path,
-		formatter: &LineFormatter{},
+		formatter: NewLineFormatter(),
 		m:         sync.Mutex{},
 	}
 
