@@ -1,1 +1,1 @@
-module github.com/lfkeitel/verbose
+module github.com/lfkeitel/verbose/v4
