@@ -18,7 +18,7 @@ type Entry struct {
 func NewEntry(l *Logger) *Entry {
 	return &Entry{
 		Logger: l,
-		Data:   make(Fields, 5),
+		Data:   nil,
 	}
 }
 
