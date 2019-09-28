@@ -44,7 +44,12 @@ func TestJSONFormatter(t *testing.T) {
 	e.Data = data
 
 	var decoded event
-	if err := json.Unmarshal(formatter.FormatByte(e), &decoded); err != nil {
+	formatted := formatter.FormatByte(e)
+	if formatted[len(formatted)-1] != '\n' {
+		t.Fatal("JSON formatter doesn't end in a newline")
+	}
+
+	if err := json.Unmarshal(formatted, &decoded); err != nil {
 		t.Errorf("JSON failed to decode into event struct: %s", err)
 	}
 

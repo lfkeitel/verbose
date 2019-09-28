@@ -37,7 +37,7 @@ func (j *JSONFormatter) FormatByte(e *Entry) []byte {
 	}
 
 	bytes, _ := json.Marshal(data)
-	return bytes
+	return append(bytes, '\n')
 }
 
 func (j *JSONFormatter) SetTimeFormat(f string) {
