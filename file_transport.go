@@ -5,18 +5,22 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 )
 
 // FileTransport writes log messages to a file to a directory
 type FileTransport struct {
-	Formatter  Formatter
-	LockWrites bool
-	min        LogLevel
-	max        LogLevel
-	path       string
-	m          sync.Mutex
-	fd         *os.File
+	Formatter   Formatter
+	LockWrites  bool
+	min         LogLevel
+	max         LogLevel
+	path        string
+	m           sync.Mutex
+	fd          *os.File
+	reopenTimer time.Timer
 }
+
+const reopenTimerDur = 5 * time.Minute
 
 // NewFileTransport takes the path and returns a FileTransport. If the path exists,
 // file or directory mode will be Determined by what path is. If it doesn't exist,
@@ -31,12 +35,13 @@ func NewFileTransportWith(path string, fmt Formatter) (*FileTransport, error) {
 	path, _ = filepath.Abs(path)
 
 	f := &FileTransport{
-		Formatter:  fmt,
-		min:        LogLevelDebug,
-		max:        LogLevelFatal,
-		path:       path,
-		m:          sync.Mutex{},
-		LockWrites: true,
+		Formatter:   fmt,
+		min:         LogLevelDebug,
+		max:         LogLevelFatal,
+		path:        path,
+		m:           sync.Mutex{},
+		LockWrites:  true,
+		reopenTimer: *time.NewTimer(reopenTimerDur),
 	}
 
 	if err := f.open(); err != nil {
@@ -86,6 +91,18 @@ func (f *FileTransport) WriteLog(e *Entry) {
 	if f.LockWrites {
 		f.m.Lock()
 		defer f.m.Unlock()
+	}
+
+	select {
+	case <-f.reopenTimer.C:
+		// Reopening the file in case the file handle has changed
+		// This fixes issues with logrotate
+		if err := f.reopen(); err != nil {
+			fmt.Printf("Error writing to log file: %v\n", err)
+			return
+		}
+		f.reopenTimer.Reset(reopenTimerDur)
+	default:
 	}
 
 	// Attempt first write
