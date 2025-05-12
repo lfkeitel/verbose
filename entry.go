@@ -1,9 +1,7 @@
-// This file was generated with level_generator. DO NOT EDIT
-
 package verbose
 
 import (
-	"fmt"
+	"os"
 	"time"
 )
 
@@ -20,7 +18,7 @@ type Entry struct {
 func NewEntry(l *Logger) *Entry {
 	return &Entry{
 		Logger: l,
-		Data:   make(Fields, 5),
+		Data:   nil,
 	}
 }
 
@@ -41,28 +39,54 @@ func (e *Entry) WithFields(fields Fields) *Entry {
 	return &Entry{Logger: e.Logger, Data: data}
 }
 
-// Log is the generic function to log a message with the handlers.
-// All other logging functions are simply wrappers around this.
-func (e *Entry) log(level LogLevel, msg string) {
-	e.Logger.m.RLock()
-	e.Level = level
-	e.Message = msg
-	e.Timestamp = time.Now()
-	for _, h := range e.Logger.handlers {
-		if h.Handles(level) {
-			h.WriteLog(e)
-		}
-	}
-	e.Logger.m.RUnlock()
+// Debug - Log Debug message
+func (e *Entry) Debug(msg string) {
+	e.Logger.log(e, LogLevelDebug, msg)
 }
 
-// sprintlnn take from Logrus: github.com/Sirupsen/logrus entry.go
+// Info - Log Info message
+func (e *Entry) Info(msg string) {
+	e.Logger.log(e, LogLevelInfo, msg)
+}
 
-// Sprintlnn => Sprint no newline. This is to get the behavior of how
-// fmt.Sprintln where spaces are always added between operands, regardless of
-// their type. Instead of vendoring the Sprintln implementation to spare a
-// string allocation, we do the simplest thing.
-func (e *Entry) sprintlnn(args ...interface{}) string {
-	msg := fmt.Sprintln(args...)
-	return msg[:len(msg)-1]
+// Notice - Log Notice message
+func (e *Entry) Notice(msg string) {
+	e.Logger.log(e, LogLevelNotice, msg)
+}
+
+// Warning - Log Warning message
+func (e *Entry) Warning(msg string) {
+	e.Logger.log(e, LogLevelWarning, msg)
+}
+
+// Error - Log Error message
+func (e *Entry) Error(msg string) {
+	e.Logger.log(e, LogLevelError, msg)
+}
+
+// Critical - Log Critical message
+func (e *Entry) Critical(msg string) {
+	e.Logger.log(e, LogLevelCritical, msg)
+}
+
+// Alert - Log Alert message
+func (e *Entry) Alert(msg string) {
+	e.Logger.log(e, LogLevelAlert, msg)
+}
+
+// Emergency - Log Emergency message
+func (e *Entry) Emergency(msg string) {
+	e.Logger.log(e, LogLevelEmergency, msg)
+}
+
+// Fatal - Log Fatal message
+func (e *Entry) Fatal(msg string) {
+	e.Logger.log(e, LogLevelFatal, msg)
+	os.Exit(1)
+}
+
+// Panic - Log Panic message
+func (e *Entry) Panic(msg string) {
+	e.Logger.log(e, LogLevelEmergency, msg)
+	panic(msg)
 }

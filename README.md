@@ -2,31 +2,50 @@
 
 [![GoDoc](https://godoc.org/github.com/lfkeitel/verbose?status.svg)](https://godoc.org/github.com/lfkeitel/verbose)
 
-Verbose allows for organized, simplified, custom logging for any application. Verbose makes creating logs easy.
-Create multiple loggers for different purposes each with their own handlers. Verbose supports both traditional
-message only logs as well as structured logs. The handling of which is up to the implemented Handlers.
+Verbose is a library for simple, organized structured logging. Verbose is a very
+flexible library allowing for multiple log outputs and formatters for each
+output ensuring data is always formatted correctly for each destination.
 
 ## Usage
 
-Creating a Logger:
+The easiest way to start with Verbose is to use the package level logger:
 
-```Go
-import "github.com/lfkeitel/verbose"
+```go
+import (
+    log "github.com/lfkeitel/verbose/v5"
+)
 
-appLogger := verbose.New("app")
-appLogger.Info("Application started")
-appLogger.Warning("User not found")
-appLogger.Error("I can't handle this")
-appLogger.Fatal("Unhandled error occurred") // Calls os.Exit(1)
+func main() {
+    log.WithFields(log.Fields{
+        "path": "/",
+        "user": "Alice",
+    }).Info("Received request")
+
+    // Or without fields
+    log.Info("Hello")
+}
 ```
 
-You can also use the Get() func to get a specific logger. If Get() can't
-find the logger by name, it will create a new logger:
+You can also create loggers to pass around:
 
-```Go
-logger := verbose.New("app")
-logger = verbose.Get("app").Info("Error message") // Uses existing logger
-logger = verbose.Get("module").Error("Error") // Creates new logger named 'module' and issues error
+```go
+import (
+    log "github.com/lfkeitel/verbose/v5"
+)
+
+func main() {
+    logger := log.New()
+    ft, _ := log.NewFileTransport("applogs.txt") // Ignoring errors
+    logger.AddTransport(ft)
+
+    logger.WithFields(log.Fields{
+        "path": "/",
+        "user": "Alice",
+    }).Info("Received request")
+
+    // Or without fields
+    logger.Info("Hello")
+}
 ```
 
 ## Supported Log Levels
@@ -44,9 +63,10 @@ logger = verbose.Get("module").Error("Error") // Creates new logger named 'modul
 You can also use the following functions:
 
 - Print
-- Panic
+- Panic (calls panic() after writing log)
 
-All functions take the form of Print[f|ln]. E.g.: Print, Printf, Println.
+Verbose does not facilitate formatted log message. Instead, structured logging
+is preferred and highly encouraged.
 
 ## Structured Logging
 
@@ -59,61 +79,60 @@ logger.WithFields(verbose.Fields{
 }).Debug("This is a debug message")
 ```
 
-The fields should be formatted appropriately by the handler.
+The fields will be formatted appropriately by the handler.
 
-## Handlers
+## Transports
 
-A Logger initially is nothing more than a shell. Without handlers it won't do anything.
-Verbose comes with two pre-built handlers. You can use your own handlers so long as they
-satisfy the verbose.Handler interface. You can add a handler by calling `logger.AddHandler(name, Handler)`.
-A Logger will cycle through all the handlers and send the message to any that report
-they can handle the log level. Each handler should be given a unique name which can be used to later
-remove or get the handler to make changes to it.
+A Logger initially is nothing more than a shell. Without transports it won't do
+anything. This library comes with two transports. You can use your own
+transports so long as they satisfy the verbose.Handler interface. You can add a
+handler by calling `logger.AddHandler()`. A Logger will loop through all the
+transports and send the message to any that report they can handle the log
+level.
 
-### StdoutHandler
+### TextTransport
 
-The StdoutHandler will print colored log messages to stdout.
-
-```go
-// Handler that supports color terminals
-sh := verbose.NewStdoutHandler(true)
-
-// Handler that doesn't use color
-sh := verbose.NewStdoutHandler(false)
-```
-
-### FileHandler
-
-The FileHandler will write log messages to a file or directory. If it's writing to a directory,
-each log level will have its own file. Otherwise all log levels are written to a single file.
+The TextTransport will print colored log messages to stderr. The output can be
+changed by calling `.SetOutput()` with an io.Writer.
 
 ```go
-// If path exists and is a file, it will write all logs to that file
-// If path exists and is a directory, it will write logs to individual files per level
-// If path does not exist but has an extension, assumed to be a file and attempts to create it
-// If path does not exist and has no extension, assumed to be a directory and attempts to os.MkDirAll()
-fh := verbose.NewFileHandler(path)
+sh := verbose.NewTextTransport()
 ```
+
+The text transport will use color if the output is a valid terminal. Otherwise
+color is disabled. To force color to be enabled or disabled, create a custom
+LineFormatter with color set to true or false.
+
+### FileTransport
+
+The FileTransport will write log messages to a file. If the file exists, it will
+be appended to. Otherwise the file will be created.
+
+```go
+fh := verbose.NewFileTransport(path)
+```
+
+The file transport uses a non-color line formatter by default. You can change
+the formatter by setting `.Formatter` on the transport object.
 
 ## Formatters
 
-A formatter is used to actually construct a log line that a handler will then store or display.
-Like handlers, Verbose comes with 3 pre-built formatters but anything satisfying the interface
-will work.
-
-Each handler has a default formatter. The File and StdOut handlers use the LineFormatter as
-their defaults. To change a formatter, use the Handler.SetFormatter(Formatter) method.
+A formatter is used to actually construct a log line that a transport will then
+store or display. This library comes with 3 formatters but anything satisfying
+the interface can be used.
 
 ### Time Format
 
-The time format used by formatters can be set using the Formatter.SetTimeFormat() method.
-The default time format for included formatters is RFC3339: "2006-01-02T15:04:05Z07:00". The time
-format can be any valid Go time format.
+The time format used by formatters can be set using the
+Formatter.SetTimeFormat() method. The default time format for included
+formatters is RFC3339: "2006-01-02T15:04:05Z07:00". The time format can be any
+valid Go time format.
 
 ### JSONFormatter
 
-The JSON formatter is great when the logs are being processed by a centralized logging solution
-or some other computerized system. It will generate a JSON object with the following structure:
+The JSON formatter is great when the logs are being processed by a centralized
+logging solution or some other computerized system. It will generate a JSON
+object with the following structure:
 
 ```json
 {
@@ -132,19 +151,37 @@ Any structured fields will go in the data object.
 
 ### LineFormatter
 
-The line formatter is designed to be human readable either for file that will mainly be viewed by
-humans, or for standard output. A sample output line would be:
+The line formatter is designed to be human readable either for a file that will
+mainly be viewed by humans, or for standard output. A sample output line would
+be:
 
 ```
 1970-01-01T12:00:00Z: INFO: app: message: | "field 1": "value 1", "field 2": "value 2"
 ```
 
-### ColoredLineFormatter
+The formatter can format with or without color. To change the color setting
+after creation, set the `.UseColor` field.
 
-Same as the line formatter but uses ASCII color codes to make things pretty. This formatter is really
-only meant for standard output as the escape codes are really annoying when looking at a log file.
+### LogfmtFormatter
+
+The logfmt formatter formats logs into the [logfmt](https://www.brandur.org/logfmt) format.
+
+```
+timestamp="2019-09-17T15:54:51-05:00" level=INFO logger="" msg="This happened" foo="bar" result="3"
+```
 
 ## Release Notes
+
+v5.0.0
+
+- Renamed handlers to transports
+- Simplified API by removing all format and line print functions
+- Simplified Transport and Formatter interfaces
+- Added a package level logger
+- Added [logfmt](https://www.brandur.org/logfmt) formatter
+- Made logger name optional
+- Removed logger store, the library no longer maintains a repository of created
+  loggers
 
 v4.0.0
 
@@ -182,9 +219,10 @@ v1.0.0
 
 ## Versioning
 
-For transparency into the release cycle and in striving to maintain backward compatibility,
-this application is maintained under the Semantic Versioning guidelines.
-Sometimes I screw up, but I'll adhere to these rules whenever possible.
+For transparency into the release cycle and in striving to maintain backward
+compatibility, this application is maintained under the Semantic Versioning
+guidelines. Sometimes I screw up, but I'll adhere to these rules whenever
+possible.
 
 Releases will be numbered with the following format:
 
@@ -192,12 +230,15 @@ Releases will be numbered with the following format:
 
 And constructed with the following guidelines:
 
-- Breaking backward compatibility **bumps the major** while resetting minor and patch
-- New additions without breaking backward compatibility **bumps the minor** while resetting the patch
+- Breaking backward compatibility **bumps the major** while resetting minor and
+  patch
+- New additions without breaking backward compatibility **bumps the minor**
+  while resetting the patch
 - Bug fixes and misc changes **bumps only the patch**
 
 For more information on SemVer, please visit <http://semver.org/>.
 
 ## License
 
-This package is released under the terms of the MIT license. Please see LICENSE for more information.
+This package is released under the terms of the MIT license. Please see LICENSE
+for more information.
