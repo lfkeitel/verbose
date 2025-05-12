@@ -17,7 +17,7 @@ type FileTransport struct {
 	path        string
 	m           sync.Mutex
 	fd          *os.File
-	reopenTimer time.Timer
+	reopenTimer *time.Timer
 }
 
 const reopenTimerDur = 5 * time.Minute
@@ -41,7 +41,7 @@ func NewFileTransportWith(path string, fmt Formatter) (*FileTransport, error) {
 		path:        path,
 		m:           sync.Mutex{},
 		LockWrites:  true,
-		reopenTimer: *time.NewTimer(reopenTimerDur),
+		reopenTimer: time.NewTimer(reopenTimerDur),
 	}
 
 	if err := f.open(); err != nil {
